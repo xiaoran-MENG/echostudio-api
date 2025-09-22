@@ -18,15 +18,21 @@ public class AlbumController {
     private final AlbumService service;
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestPart("request") String request, @RequestPart("image") MultipartFile image) {
+    public ResponseEntity<?> create(
+            @RequestPart("request") String requestBody,
+            @RequestPart("image") MultipartFile image) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            var createRequest = mapper.readValue(request, CreateAlbumRequest.class);
-            createRequest.setImage(image);
-            Album album = this.service.create(createRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(album);
+            var request = new ObjectMapper().readValue(
+                    requestBody,
+                    CreateAlbumRequest.class);
+            request.setImage(image);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(this.service.create(request));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
         }
     }
 
@@ -39,7 +45,7 @@ public class AlbumController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> remove(@PathVariable String id) {
         try {
             return this.service.remove(id)
